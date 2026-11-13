@@ -14,6 +14,7 @@ Keep it running: it also runs the Gazebo-to-ROS image bridge.
 import argparse
 import subprocess
 import sys
+import random
 
 from basketball_moveit.scripts import vision
 
@@ -75,9 +76,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--ball-x", type=float, default=vision.BALL_XY[0])
     parser.add_argument("--ball-y", type=float, default=vision.BALL_XY[1])
+    parser.add_argument("--random", action="store_true", help="put the ball at a random spot")
+    parser.add_argument("--seed", type=int, default=None, help="repeatable random spot")
     parser.add_argument("--no-ball", action="store_true", help="only spawn the camera")
     parser.add_argument("--no-bridge", action="store_true", help="do not start the image bridge")
     args = parser.parse_args()
+
+    if args.random:
+        rng = random.Random(args.seed)
+        args.ball_x = rng.uniform(0.15, 0.40)
+        args.ball_y = rng.uniform(-0.20, 0.20)
+        print(f"Random ball position: x={args.ball_x:.3f} y={args.ball_y:.3f}")
 
     # The camera hangs at CAM_POS (base_link), which is also what the detector assumes.
     cx, cy, cz = vision.CAM_POS
