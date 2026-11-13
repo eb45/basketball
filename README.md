@@ -52,7 +52,3 @@ The camera image is shown in terminal 5 (`rqt_image_view`) instead of RViz, beca
 | `/ball_position` | Ball position in `base_link`, meters |
 | `/ball_marker` | Orange sphere for RViz |
 | `/ball_detector/debug` | Annotated image |
-
-## Known issues
-
-The gripper does not move in the current sim (it stalls at about -0.10), so `pick_ball` cannot grab the ball.
