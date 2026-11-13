@@ -15,7 +15,7 @@ setup(
     zip_safe=True,
     maintainer='root',
     maintainer_email='root@todo.todo',
-    description='Basketball planning scene for the Kinova Gen3 Lite',
+    description='Basketball scene, overhead camera, and ball detection for the Kinova Gen3 Lite',
     license='TODO: License declaration',
     extras_require={
         'test': [
@@ -25,6 +25,8 @@ setup(
     entry_points={
         'console_scripts': [
             'basketball_scene = basketball_moveit.scripts.basketball_scene:main',
+            'spawn_overhead_camera = basketball_moveit.scripts.spawn_overhead_camera:main',
+            'ball_detector = basketball_moveit.scripts.ball_detector:main',
         ],
     },
 )
