@@ -18,17 +18,17 @@ FRAME = "base_link"
 
 # Shift the whole board assembly (whiteboard, backboard, hoop) away from the robot,
 # and raise the rim on the backboard. Tune these two numbers.
-BOARD_SHIFT_X = 0.10   # meters farther from the robot
+BOARD_SHIFT_X = 0.40   # meters farther from the robot (was 0.10)
 HOOP_RAISE = 0.08      # meters higher on the backboard
 
 # The arm's base_link is approximately above the tabletop. The table spans x=0
 # so the robot is ON the table, not floating alongside a separate small table.
 # Top of table = -0.08 m in the base_link frame (approximate; verify in RViz).
-# Table is extended so the shifted whiteboard still sits on it
-# (far edge was 0.57 m, now 0.67 m; near edge unchanged at -0.33 m).
-TABLE_CENTER = (0.17, 0.0, -0.14)
-TABLE_SIZE = (1.00, 0.65, 0.12)           # (x, y, z) in meters
-BALL_DIAMETER = 0.08                    # 5 inches
+# Table is extended automatically so the shifted whiteboard still sits on it
+# (near edge fixed at -0.33 m, far edge = 0.57 m + BOARD_SHIFT_X).
+TABLE_CENTER = (0.12 + BOARD_SHIFT_X / 2, 0.0, -0.14)
+TABLE_SIZE = (0.90 + BOARD_SHIFT_X, 0.65, 0.12)           # (x, y, z) in meters
+BALL_DIAMETER = 0.127                    # 5 inches
 # Place the ball ahead of the robot, between base_link x=0 and the hoop.
 BALL_CENTER_XY = (0.24, 0.0)
 # Midterm whiteboard collision object (base_link frame), shifted by BOARD_SHIFT_X.
