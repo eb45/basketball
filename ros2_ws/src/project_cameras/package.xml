@@ -22,3 +22,27 @@
     <build_type>ament_python</build_type>
   </export>
 </package>
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>project_cameras</name>
+  <version>1.0.0</version>
+  <description>Launch files and a Python helper for the course's USB webcams and RealSense D435i and D421 cameras.</description>
+  <maintainer email="evan.kusa@duke.edu">Evan Kusa</maintainer>
+  <license>MIT</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>usb_cam</exec_depend>
+  <exec_depend>realsense2_camera</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
