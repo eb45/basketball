@@ -32,6 +32,7 @@ setup(
             'ball_detector = basketball_moveit.scripts.ball_detector:main',
             'check_ball = basketball_moveit.scripts.check_ball:main',
             'pick_ball = basketball_moveit.scripts.pick_ball:main',
+            'dunk_ball = basketball_moveit.scripts.dunk_ball:main',
         ],
     },
 )

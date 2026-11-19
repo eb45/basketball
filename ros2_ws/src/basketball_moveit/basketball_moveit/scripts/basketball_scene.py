@@ -19,6 +19,7 @@ FRAME = "base_link"
 # Shift the whole board assembly (whiteboard, backboard, hoop) away from the robot,
 # and raise the rim on the backboard. Tune these two numbers.
 BOARD_SHIFT_X = 0.40   # meters farther from the robot (was 0.10)
+# BOARD_SHIFT_X = 0.65 - 0.37   # use this for dunk_ball.py since the arm cannot reach the hoop with BOARD_SHIFT_X=0.40
 HOOP_RAISE = 0.08      # meters higher on the backboard
 
 # The arm's base_link is approximately above the tabletop. The table spans x=0
