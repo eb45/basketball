@@ -21,7 +21,7 @@ HFOV = 1.047  # horizontal field of view, about 60 degrees
 CAM_POS = (0.24, 0.0, 1.0)
 
 # Ball (meters). The arm base sits 0.0627 m above the tabletop.
-BALL_DIAMETER = 0.08
+BALL_DIAMETER = 0.06
 TABLE_TOP_Z = -0.0627
 BALL_Z = TABLE_TOP_Z + BALL_DIAMETER / 2
 BALL_XY = (0.24, 0.0)
