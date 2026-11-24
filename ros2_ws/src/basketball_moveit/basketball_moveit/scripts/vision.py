@@ -68,6 +68,32 @@ def pixel_to_world(u, v, cam_pos=CAM_POS, plane_z=BALL_Z, intr=None):
     y = cam_pos[1] - xn * depth
     return x, y, plane_z
 
+def ball_center_from_depth(depth, mask, u, v, radius_px, ball_radius, intr,
+                           inner=0.6, min_valid=0.3):
+    """Ball center (x, y, z) in the camera's optical frame, from a depth image in meters.
+
+    The depth camera sees the front of the ball, so each reading is pushed back
+    to the center using the sphere's shape. Only the middle of the blob is used,
+    because depth is unreliable near the ball's edge. Returns None if too few
+    pixels there have a depth reading.
+    """
+    fx, fy, cx, cy = intr
+    rows, cols = depth.shape
+    reach = int(math.ceil(radius_px * inner))
+    u0, u1 = max(int(u) - reach, 0), min(int(u) + reach + 1, cols)
+    v0, v1 = max(int(v) - reach, 0), min(int(v) + reach + 1, rows)
+    if u0 >= u1 or v0 >= v1:
+        return None
+    vv, uu = np.mgrid[v0:v1, u0:u1]
+    rho2 = ((uu - u) ** 2 + (vv - v) ** 2) / radius_px ** 2  # 0 at center, 1 at the edge
+    patch = depth[v0:v1, u0:u1]
+    on_ball = (rho2 <= inner ** 2) & (mask[v0:v1, u0:u1] > 0)
+    valid = on_ball & np.isfinite(patch) & (patch > 0)
+    if not valid.any() or valid.sum() < min_valid * on_ball.sum():
+        return None
+    z = float(np.median(patch[valid] + ball_radius * np.sqrt(1.0 - rho2[valid])))
+    return (u - cx) / fx * z, (v - cy) / fy * z, z
+
 
 def world_to_pixel(x, y, z, cam_pos=CAM_POS, intr=None):
     """Project a world point into the image (inverse of pixel_to_world)."""

@@ -1,0 +1,24 @@
+On the host:
+
+mkdir -p ~/workspaces && cd ~/workspaces
+git clone https://github.com/eb45/basketball.git
+xhost +local:
+
+docker run --rm -it --name kinova --net=host -e DISPLAY=$DISPLAY -e ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST -v /tmp/.X11-unix:/tmp/.X11-unix:ro -v ~/workspaces:/root/workspaces -v /dev:/dev --device-cgroup-rule "c 81:* rmw" --device-cgroup-rule "c 189:* rmw" ghcr.io/mems-intro-to-robotics/mems-robotics-toolkit:kinova-jazzy-latest
+
+Inside the container:
+
+apt-get update && apt-get install -y ros-jazzy-usb-cam ros-jazzy-realsense2-camera
+cd /root/workspaces/basketball/ros2_ws
+colcon build --symlink-install
+source install/setup.bash
+
+Start cam and detector:
+
+ros2 launch basketball_moveit realsense_ball.launch.py x:=0.24 y:=0.0 z:=1.0 pitch:=1.5708 ball_diameter:=0.06
+
+Debug image view (in a second terminal on the host):
+
+docker exec -it kinova bash
+cd /root/workspaces/basketball/ros2_ws && source install/setup.bash
+ros2 run rqt_image_view rqt_image_view /ball_detector/debug
