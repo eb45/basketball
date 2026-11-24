@@ -41,7 +41,7 @@ Start them in order, and wait for Gazebo to finish loading before terminal 3.
 In a new terminal, to run throw_checker.py and simulate the launch:
 
 ```bash
-cd ~/workspaces/final-project/ros2_ws/src/final_project
+cd ~/workspaces/basketball/ros2_ws/src/basketball_moveit/basketball_moveit
 ```
 
 ```bash
