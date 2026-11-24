@@ -14,37 +14,58 @@ ARM_JOINTS = ["joint_1", "joint_2", "joint_3", "joint_4", "joint_5", "joint_6"]
 FRAME = "base_link"
 
 # All locations are expressed in meters in the robot's base_link frame.
-# IMPORTANT: EXAMPLE ONLY. Measure the real setup and replace all these locations.
+# Geometry is illustrative; verify it against the actual setup.
 
-# Shift the whole board assembly (whiteboard, backboard, hoop) away from the robot,
-# and raise the rim on the backboard. Tune these two numbers.
-BOARD_SHIFT_X = 0.40   # meters farther from the robot (was 0.10)
-HOOP_RAISE = 0.08      # meters higher on the backboard
+BOARD_SHIFT_X = 0.22
+HOOP_RAISE = 0.08
 
-# The arm's base_link is approximately above the tabletop. The table spans x=0
-# so the robot is ON the table, not floating alongside a separate small table.
-# Top of table = -0.08 m in the base_link frame (approximate; verify in RViz).
-# Table is extended automatically so the shifted whiteboard still sits on it
-# (near edge fixed at -0.33 m, far edge = 0.57 m + BOARD_SHIFT_X).
-TABLE_CENTER = (0.12 + BOARD_SHIFT_X / 2, 0.0, -0.14)
-TABLE_SIZE = (0.90 + BOARD_SHIFT_X, 0.65, 0.12)           # (x, y, z) in meters
-BALL_DIAMETER = 0.127                    # 5 inches
-# Place the ball ahead of the robot, between base_link x=0 and the hoop.
+# Mounting plane relative to base_link. Adjust ROBOT_MOUNT_Z if your robot's
+# base mesh uses a different mounting-plane offset from the standard origin.
+ROBOT_MOUNT_Z = 0.0
+TABLE_SURFACE_CLEARANCE = 0.001  # 1 mm avoids touching the fixed base collider.
+TABLE_TOP = ROBOT_MOUNT_Z - TABLE_SURFACE_CLEARANCE
+TABLE_SIZE = (0.90 + BOARD_SHIFT_X, 0.65, 0.12)
+TABLE_CENTER = (
+    0.12 + BOARD_SHIFT_X / 2,
+    0.0,
+    TABLE_TOP - TABLE_SIZE[2] / 2,
+)
+
+BALL_DIAMETER = 0.127
 BALL_CENTER_XY = (0.24, 0.0)
-# Midterm whiteboard collision object (base_link frame), shifted by BOARD_SHIFT_X.
-WHITEBOARD_CENTER = (0.56 + BOARD_SHIFT_X, 0.0, 0.17)
-WHITEBOARD_SIZE = (0.02, 0.55, 0.30)
-WHITEBOARD_TOP = WHITEBOARD_CENTER[2] + WHITEBOARD_SIZE[2] / 2  # 0.32 m
 
-# Example mounting geometry: mini backboard rests immediately above whiteboard.
-# Measurements below are approximate and must be checked against actual mount.
-HOOP_CENTER = (0.37 + BOARD_SHIFT_X, 0.0, 0.39 + HOOP_RAISE)  # rim in front of board, near its top
-HOOP_INNER_DIAMETER = 0.2286            # 9 inches: verify usable opening
-RIM_THICKNESS = 0.010                   # measure real rim tube thickness
-BACKBOARD_SIZE = (0.015, 0.4572, 0.2667)  # thickness estimated; width/height advertised
-BACKBOARD_CENTER = (0.535 + BOARD_SHIFT_X, 0.0, WHITEBOARD_TOP + BACKBOARD_SIZE[2] / 2)
-RIM_SEGMENTS = 12                       # ring approximation, not a solid disk
-APPROACH_CLEARANCE = 0.12               # clearance above ball/rim, adjust safely
+# Upper backboard is the reference. Its position and dimensions are unchanged.
+BACKBOARD_SIZE = (0.015, 0.4572, 0.2667)
+BACKBOARD_BOTTOM_Z = 0.32
+BACKBOARD_CENTER = (
+    0.535 + BOARD_SHIFT_X,
+    0.0,
+    BACKBOARD_BOTTOM_Z + BACKBOARD_SIZE[2] / 2,
+)
+BACKBOARD_FRONT_X = BACKBOARD_CENTER[0] - BACKBOARD_SIZE[0] / 2
+
+# Extend the lower whiteboard from the tabletop to the upper backboard.
+# Preserve its original width and thickness; make both front faces flush.
+WHITEBOARD_THICKNESS = 0.02
+WHITEBOARD_WIDTH = 0.55
+WHITEBOARD_BOTTOM_Z = TABLE_TOP
+WHITEBOARD_TOP = BACKBOARD_CENTER[2] - BACKBOARD_SIZE[2] / 2
+WHITEBOARD_HEIGHT = WHITEBOARD_TOP - WHITEBOARD_BOTTOM_Z
+if WHITEBOARD_HEIGHT <= 0:
+    raise ValueError("The upper backboard must start above the tabletop")
+WHITEBOARD_SIZE = (WHITEBOARD_THICKNESS, WHITEBOARD_WIDTH, WHITEBOARD_HEIGHT)
+WHITEBOARD_CENTER = (
+    BACKBOARD_FRONT_X + WHITEBOARD_THICKNESS / 2,
+    BACKBOARD_CENTER[1],
+    (WHITEBOARD_BOTTOM_Z + WHITEBOARD_TOP) / 2,
+)
+
+# Preserve the existing hoop location relative to the upper backboard assembly.
+HOOP_CENTER = (0.37 + BOARD_SHIFT_X, 0.0, 0.39 + HOOP_RAISE)
+HOOP_INNER_DIAMETER = 0.3
+RIM_THICKNESS = 0.010
+RIM_SEGMENTS = 12
+APPROACH_CLEARANCE = 0.12
 
 
 def yaw_quaternion(yaw):
@@ -84,14 +105,10 @@ class BasketballScene(Node):
         self.get_logger().info(f"Added {name}: center={center}, size={size}")
 
     def add_environment(self):
-        # Table spans underneath robot base at x=0; it is not a separate table off to the side.
-        # NOTE: if the table intersects the arm base collision geometry, adjust
-        # TABLE_CENTER[2] after checking the model in RViz.
         self.box("basketball_table", TABLE_SIZE, TABLE_CENTER)
 
         table_top = TABLE_CENTER[2] + TABLE_SIZE[2] / 2
         ball_center = (BALL_CENTER_XY[0], BALL_CENTER_XY[1], table_top + BALL_DIAMETER / 2)
-        # The basketball is a sphere, not a cube.
         self.moveit2.add_collision_sphere(
             id="basketball",
             radius=BALL_DIAMETER / 2,
@@ -100,17 +117,10 @@ class BasketballScene(Node):
         )
         self.get_logger().info(f"Added sphere basketball: center={ball_center}")
 
-        # Whiteboard from the original midterm project
         self.box("whiteboard", WHITEBOARD_SIZE, WHITEBOARD_CENTER)
-
-        # Product backboard attached at the top of that whiteboard.
-        # It is separate geometry because the hoop extends above the board.
         self.box("backboard", BACKBOARD_SIZE, BACKBOARD_CENTER)
 
         hx, hy, hz = HOOP_CENTER
-
-        # Approximate a horizontal hoop rim as many thin tangent boxes.
-        # Do not fill the opening: a solid collision box would prevent dunking.
         centerline_radius = HOOP_INNER_DIAMETER / 2 + RIM_THICKNESS / 2
         segment_length = 2 * centerline_radius * math.sin(math.pi / RIM_SEGMENTS) * 1.02
         for i in range(RIM_SEGMENTS):
@@ -128,9 +138,8 @@ class BasketballScene(Node):
             )
 
         self.get_logger().info(
-            "Planning scene added: table under robot base, ball ahead of arm, "
-            "whiteboard/hoop beyond ball. Positions are illustrative; verify "
-            "in RViz before reachability/collision tests."
+            "Planning scene added: lower whiteboard meets the tabletop and upper "
+            "backboard, with flush front faces. Verify dimensions in RViz."
         )
         return ball_center
 
@@ -141,7 +150,6 @@ class BasketballScene(Node):
         return pose
 
     def plan_test(self, ball_center, orientation, execute=False):
-        # Above the two objects, rather than inside their collision geometry.
         ball_approach = (
             ball_center[0], ball_center[1],
             ball_center[2] + BALL_DIAMETER / 2 + APPROACH_CLEARANCE,
@@ -207,3 +215,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
