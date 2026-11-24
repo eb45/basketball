@@ -1,58 +1,3 @@
-"""The robot arm throws the basketball; the arm's motion decides where the ball goes.
-
-Start the simulation, MoveIt, and basketball_scene, then run:
-    python3 -m final_project.throw_check --throw --slow 0.25
-    python3 -m final_project.throw_check --simple-throw --set-home --slow 0.25
-
---throw: the ball is attached to the gripper. The arm winds up, then swings in a
-         straight line through the release point. At the release moment the script
-         MEASURES the ball's velocity from the arm's real joint motion (forward
-         kinematics on /joint_states), detaches the ball, and flies it as an ideal
-         projectile with THAT velocity. A faster swing sends the ball farther; a
-         slower swing, a shorter distance. Nothing about the arc is pre-computed.
-         Afterwards it prints whether the shot scored and where a rim would have to
-         be to catch this shot, as BOARD_SHIFT_X / HOOP_RAISE values for
-         basketball_scene.py.
---simple-throw (also --max-throw): starts from the saved straight pose and
-         swings --swing-joint (joint_2 by default) with an optional small elbow
-         movement (--elbow-joint joint_3, --elbow-deg 20 by default). Elbow travel
-         is 20 degrees total: up to 10 degrees each side of neutral. Base and
-         wrist joint targets retain their starting angles. Shoulder-only paths
-         are compared too; the strongest collision-checked predicted throw is
-         selected. Use --no-elbow to reproduce the shoulder-only candidate set. Windup is limited to --windup-deg and
-         follow-through to --follow-deg. Position the arm in your desired straight
-         pose and pass --set-home to record it. No arbitrary six-joint poses
-         are searched. The strongest valid swing within these limits is used.
---animate: shows the IDEAL arc to the current hoop with no arm motion (reference only).
-No flag: prints the ideal-arc analysis only.
-
-How to get a farther shot within the arm's limits:
-  * --swing-speed 1.0 (default) uses the arm's full configured speed for the swing.
-  * A longer straight run lets the arm build up speed: raise --stroke and --follow.
-    Release happens mid-run, where the speed is highest.
-  * Releasing from higher (a larger Z in --release) gives the ball more fall time,
-    which adds distance. A lower --angle also adds distance at low speeds.
-  * Then move the hoop to where the printed suggestion says the ball lands.
-
-Each --throw cancels prior MoveIt trajectory execution, clears any stale ball
-attachment, restores the ball and returns the arm to a saved starting pose.
-The first new run records its measured starting joints. Use --set-home to
-record a different start after positioning the robot, or --home-joints to
-provide all six joint angles in radians. This resets pose/scene; it does not
-restart the external robot, controller or MoveIt launch processes.
-The visible sequence is: start -> ready -> draw back -> pause -> swing ->
-release/flight -> reset. The final ball position is shown for --finish-pause.
-
---release is the BALL CENTER in base_link where the throw is released.
---ball-offset describes the ball center in the tool frame; tune it and
---touch-links for your gripper. Gripper settings below are examples from the
-supplied code; --no-gripper skips finger motion but still releases the ball.
-
-Limits of this simulation: after release the ball is an ideal projectile (no drag,
-spin, bounce or contact with the rim). The release velocity is the arm's real
-simulated motion, so it is only as accurate as the robot model and controller.
-System time is used by default. Add --use-sim-time only with an advancing /clock.
-"""
 import argparse
 import copy
 import json
@@ -61,12 +6,12 @@ from pathlib import Path
 import threading
 import time
 
-from final_project.basketball_scene import (
+from .basketball_scene import (
     ARM_JOINTS, BACKBOARD_CENTER, BACKBOARD_SIZE, BALL_DIAMETER, FRAME,
     HOOP_CENTER, HOOP_INNER_DIAMETER, TABLE_CENTER, TABLE_SIZE,
     WHITEBOARD_CENTER, WHITEBOARD_SIZE,
 )
-from final_project import basketball_scene as scene_geometry
+from . import basketball_scene as scene_geometry
 
 G = 9.81
 BALL_RADIUS = BALL_DIAMETER / 2

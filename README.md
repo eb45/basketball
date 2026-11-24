@@ -35,19 +35,9 @@ cd /root/workspaces/basketball/ros2_ws && source install/setup.bash
 | 5 | `ros2 run rqt_image_view rqt_image_view /ball_detector/debug` |
 | 6 | `ros2 run basketball_moveit check_ball --trials 5` |
 | 7 | `ros2 run basketball_moveit basketball_scene`|
+| 8 | `ros2 run basketball_moveit throw_check --simple-throw`|
 
 Start them in order, and wait for Gazebo to finish loading before terminal 3.
-
-In a new terminal, to run throw_checker.py and simulate the launch:
-
-```bash
-cd ~/workspaces/basketball/ros2_ws/src/basketball_moveit/basketball_moveit
-```
-
-```bash
-python3 -m final_project.throw_check --simple-throw
-```
-The motion of the ball is simulated to be as realistic as possible using The ball's position when released, its velocity and direction (calculated from the simulated arm's movement), and gavity to calculate the resulting arc. 
 
 ## RViz
 

@@ -33,6 +33,7 @@ setup(
             'check_ball = basketball_moveit.scripts.check_ball:main',
             'pick_ball = basketball_moveit.scripts.pick_ball:main',
             'dunk_ball = basketball_moveit.scripts.dunk_ball:main',
+            'throw_check = basketball_moveit.scripts.throw_check:main',
         ],
     },
 )
