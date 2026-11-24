@@ -38,6 +38,17 @@ cd /root/workspaces/basketball/ros2_ws && source install/setup.bash
 
 Start them in order, and wait for Gazebo to finish loading before terminal 3.
 
+To run throw_checker.py and simulate the launch:
+
+```bash
+cd ~/workspaces/final-project/ros2_ws/src/final_project
+```
+
+```bash
+python3 -m final_project.throw_check --simple-throw
+```
+The motion of the ball is simulated to be as realistic as possible using The ball's position when released, its velocity and direction (calculated from the simulated arm's movement), and gavity to calculate the resulting arc. 
+
 ## RViz
 
 Set Fixed Frame to `base_link`. Then Add > By topic > `/ball_marker` as Marker.
